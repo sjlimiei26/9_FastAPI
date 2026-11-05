@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from app.dependencies import pagination
 from app.schemas import ItemCreate, UserCreate, UserOut
 
 router = APIRouter()   # Spring의 Controller 분리와 동일함!
@@ -7,6 +8,8 @@ router = APIRouter()   # Spring의 Controller 분리와 동일함!
 # -----------------
 #  임시 db (메모리)
 USERS = {1: {"id": 1, "username": "test01", "password": "1234"}}
+
+ITEMS = [{"id": i, "name": f"item-{i}", "price": i * 1000} for i in range(1, 11)]
 # -----------------
 
 
@@ -64,3 +67,12 @@ def get_user(user_id: int):
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+
+# [GET] /items?skip=x&limit=x
+# - response {"skip": x, "limit": x}
+# - 함수명 : list_items
+@router.get("/items")
+def list_items(page: dict = Depends(pagination)):
+    start = page["skip"]
+    return ITEMS[ start : start+page["limit"] ]
