@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from app.schemas import TodoCreate
+
 """
     TODO: 아래 REST API 명세에 맞게 매핑을 정의해봅시다.
 
@@ -20,3 +22,30 @@ router = APIRouter(prefix="/todos")
 @router.get("/health")
 def health_check():
     return "ok"
+
+# [GET]    /todos
+@router.get("") # -> /todos
+def list_todos():
+    return "ok"
+
+# [GET]    /todos/{id}
+@router.get("/{id}")
+def read_todo(id: int):
+    return id
+
+# [POST]   /todos
+# - request body : {title: "xxxxx"}
+@router.post("")
+def create_todo(body: TodoCreate):
+    return body
+
+# [PATCH]  /todos/{id} 
+@router.patch("/{id}")
+def update_todo(id: int):
+    return id
+
+
+# [DELETE] /todos/{id}
+@router.delete("/{id}")
+def delete_todo(id: int):
+    return id

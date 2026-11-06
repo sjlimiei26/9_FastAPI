@@ -20,3 +20,7 @@ class UserCreate(BaseModel):
 class UserOut(BaseModel):
     id: int
     username: str
+
+# ---------------------------------
+class TodoCreate(BaseModel):
+    title: str = Field(min_length=1)
