@@ -30,8 +30,8 @@ class TodoOut(BaseModel):
         DB에서 조회한 후,
             ORM --> 응답
     """
-    model_config = ConfigDict(from_attribute=True)
-    # * from_attribute=True : ORM 객체의 속성을 읽어서 변환하도록 허용
+    model_config = ConfigDict(from_attributes=True)
+    # * from_attributes=True : ORM 객체의 속성을 읽어서 변환하도록 허용
 
     id: int
     title: str
