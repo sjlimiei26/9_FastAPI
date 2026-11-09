@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
-from app.schemas import TodoCreate, TodoOut
+from app.schemas import TodoCreate, TodoOut, TodoUpdate
 from app.database import get_db, Session
 from app.models import Todo
 
@@ -34,9 +34,20 @@ def list_todos(db: Session = Depends(get_db)):
     return query.all()
 
 # [GET]    /todos/{id}
-@router.get("/{id}")
-def read_todo(id: int):
-    return id
+@router.get("/{id}", response_model=TodoOut)
+def read_todo(id: int,
+              db: Session = Depends(get_db)):
+
+    """
+    query = db.query(Todo)
+    return query.filter(Todo.id == id).one()
+    """
+    todo = db.get(Todo, id)
+
+    if not todo:
+        raise HTTPException(status_code=404, detail="todo not found")
+
+    return todo
 
 # [POST]   /todos
 # - request body : {title: "xxxxx"}
@@ -54,12 +65,34 @@ def create_todo(body: TodoCreate,
     return todo
 
 # [PATCH]  /todos/{id} 
-@router.patch("/{id}")
-def update_todo(id: int):
-    return id
+@router.patch("/{id}", response_model=TodoOut)
+def update_todo(id: int, body: TodoUpdate,
+                db: Session = Depends(get_db)):
+    todo = db.get(Todo, id)
+    if not todo:
+        raise HTTPException(status_code=404, detail="todo not found")
+
+    # body.model_dump(exclude_unset=True) : 요청 시 전달된 데이터만 dict
+    for key, value in body.model_dump(exclude_unset=True).items():
+        setattr(todo, key, value)
+
+    db.commit()
+    db.refresh(todo)
+    
+    return todo
 
 
 # [DELETE] /todos/{id}
-@router.delete("/{id}")
-def delete_todo(id: int):
-    return id
+@router.delete("/{id}", status_code=204)  # 204 : 성공 후 응답 body가 없을 때 (=> return 필요 없음)
+def delete_todo(id: int,
+                db: Session = Depends(get_db)):
+
+    todo = db.get(Todo, id)
+
+    if not todo:
+        raise HTTPException(status_code=404, detail="todo not found")
+
+    db.delete(todo)
+    db.commit()
+
+    # return id
