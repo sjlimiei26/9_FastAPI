@@ -23,5 +23,4 @@ def health():
 #       위의 /health 엔드포인트를 참고한다.
 @app.post("/predict", response_model=IrisOutput, dependencies=[Depends(verify_token)])
 def predict(body: IrisInput):
-    print(body)
     return predictor.predict(body)
